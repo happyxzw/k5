@@ -83,7 +83,7 @@ public class JavaBackend implements Backend {
      */
     @Override
     public Function<Definition, Definition> steps() {
-        DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ConvertDataStructureToLookup(m, false).convert(s), "convert data structures to lookups");
+        DefinitionTransformer convertDataStructureToLookup = DefinitionTransformer.fromSentenceTransformer((m, s) -> new ConvertDataStructureToLookup(m, false, globalOptions.acUnification).convert(s), "convert data structures to lookups");
 
         return d -> DefinitionTransformer.fromRuleBodyTransformer(RewriteToTop::bubbleRewriteToTopInsideCells, "bubble out rewrites below cells")
                 .andThen(DefinitionTransformer.fromSentenceTransformer(JavaBackend::convertListItemToNonFunction, "remove function attribute from ListItem production"))
@@ -106,7 +106,7 @@ public class JavaBackend implements Backend {
 
     @Override
     public Function<Module, Module> specificationSteps(Definition def) {
-        BiFunction<Module, K, K> convertCellCollections = (Module m, K k) -> new ConvertDataStructureToLookup(m, false).convert(k);
+        BiFunction<Module, K, K> convertCellCollections = (Module m, K k) -> new ConvertDataStructureToLookup(m, false, false).convert(k);
         return m -> ModuleTransformer.fromSentenceTransformer(new ResolveAnonVar()::resolve, "resolve anonymous varaibles")
                 .andThen(ModuleTransformer.fromSentenceTransformer(s -> new ResolveSemanticCasts(kompileOptions.backend.equals(Backends.JAVA)).resolve(s), "resolve semantic casts"))
                 .andThen(AddImplicitComputationCell::transformModule)
